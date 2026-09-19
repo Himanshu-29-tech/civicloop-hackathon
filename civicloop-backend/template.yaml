@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CivicLoop backend - reports API
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: python3.12
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,OPTIONS'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
+Resources:
+
+  ReportsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: civicloop-reports
+      PrimaryKey:
+        Name: id
+        Type: String
+
+  CreateReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: create_report/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ReportsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReportsTable
+      Events:
+        CreateReport:
+          Type: Api
+          Properties:
+            Path: /reports
+            Method: post
+
+  ListReportsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: list_reports/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ReportsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReportsTable
+      Events:
+        ListReports:
+          Type: Api
+          Properties:
+            Path: /reports
+            Method: get
+
+  VerifyReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: verify_report/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ReportsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReportsTable
+      Events:
+        VerifyReport:
+          Type: Api
+          Properties:
+            Path: /reports/{id}/verify
+            Method: put
+
+  UpdateLocationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update_location/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ReportsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReportsTable
+      Events:
+        UpdateLocation:
+          Type: Api
+          Properties:
+            Path: /reports/{id}/location
+            Method: put
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
