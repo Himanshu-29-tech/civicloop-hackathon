@@ -195,10 +195,8 @@ export default function Page() {
             <div className="mt-12 flex flex-wrap gap-3"><div className="rounded-2xl bg-[#ffb800] px-4 py-3"><strong className="block text-xl font-black">{totalMeals}</strong><span className="text-[11px] font-bold uppercase">total reports</span></div><div className="rounded-2xl border border-[#1f0e07]/15 bg-white/40 px-4 py-3"><strong className="block text-xl font-black">{claimedCount}</strong><span className="text-[11px] font-bold uppercase">claimed by NGOs</span></div></div>
           </div>
           <div className="relative mx-auto w-full max-w-[720px]">
-            <div className="food-orbit absolute inset-5 rounded-full border border-[#ffb800]/50" />
-            <div className="relative aspect-square overflow-hidden rounded-[45%_55%_50%_40%] shadow-[14px_14px_0_#1f0e07]">
-              <img src="/hero-food.webp" alt="Fresh food ready to donate" className="absolute inset-0 h-full w-full object-contain bg-[#1f0e07]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1f0e07]/60 via-transparent to-transparent" />
+            <div className="relative aspect-square overflow-hidden rounded-3xl bg-black shadow-[14px_14px_0_#1f0e07]">
+              <img src="/hero-food.webp" alt="Fresh food ready to donate" className="absolute inset-0 h-full w-full object-contain" />
               <div className="absolute -right-3 top-8 grid size-28 place-content-center rounded-full bg-[#ffb800] text-center font-black leading-none shadow-lg"><span className="text-3xl">AWS</span><span className="text-[10px] uppercase">powered</span></div>
               <span className="absolute bottom-8 left-8 max-w-[190px] font-display text-4xl font-black uppercase leading-[.85] tracking-[-.06em] text-[#f4efe0]">Every bite counts.</span>
             </div>
