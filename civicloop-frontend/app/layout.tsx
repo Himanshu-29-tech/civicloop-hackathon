@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import ChatWidget from '@/components/ChatWidget'
 
 export const metadata: Metadata = {
   title: 'Nourish — Good food should go further',
@@ -42,8 +43,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         {children}
+        <ChatWidget />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )
 }
+

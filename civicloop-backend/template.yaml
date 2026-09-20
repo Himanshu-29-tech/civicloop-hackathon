@@ -95,6 +95,26 @@ Resources:
             Path: /reports/{id}/location
             Method: put
 
+  ChatBotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chat_bot/
+      Handler: app.lambda_handler
+      Timeout: 30
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:Converse
+              Resource: "arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-micro-v1:0"
+      Events:
+        ChatBot:
+          Type: Api
+          Properties:
+            Path: /chat
+            Method: post
+
 Outputs:
   ApiUrl:
     Description: API Gateway endpoint URL
