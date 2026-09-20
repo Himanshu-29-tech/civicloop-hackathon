@@ -13,6 +13,7 @@ import {
   Leaf,
   MapPin,
   Menu,
+  Mic,
   PackageCheck,
   Recycle,
   RefreshCw,
@@ -74,6 +75,78 @@ export default function Page() {
   const [fType, setFType] = useState('donor')
   const [submitting, setSubmitting] = useState(false)
   const [formMsg, setFormMsg] = useState('')
+  const [listening, setListening] = useState(false)
+  const [voiceTranscript, setVoiceTranscript] = useState('')
+  const [voiceSupported, setVoiceSupported] = useState(true)
+
+  function parseVoiceInput(text: string) {
+    const lower = text.toLowerCase()
+
+    // quantity + unit, e.g. "5 kg", "20 servings", "3 boxes"
+    const qtyMatch = lower.match(/(\d+)\s*(kg|kilograms?|g|grams?|servings?|serving|boxes?|box|pieces?|plates?)/)
+    if (qtyMatch) {
+      setFQty(qtyMatch[1])
+      const unitWord = qtyMatch[2]
+      if (unitWord.startsWith('kg') || unitWord.startsWith('kilo')) setFUnit('kg')
+      else if (unitWord.startsWith('serv')) setFUnit('servings')
+      else if (unitWord.startsWith('box')) setFUnit('boxes')
+    }
+
+    // location after "at" / "in" / "near"
+    const locMatch = lower.match(/\b(?:at|in|near)\s+([a-z\s]+?)(?:[.,]|$)/)
+    if (locMatch) {
+      const loc = locMatch[1].trim()
+      setFLocation(loc.replace(/\b\w/g, (c) => c.toUpperCase()))
+    }
+
+    // item name: strip quantity phrase, location phrase, filler words
+    let itemPart = lower
+    if (qtyMatch) itemPart = itemPart.replace(qtyMatch[0], '')
+    if (locMatch) itemPart = itemPart.replace(locMatch[0], '')
+    itemPart = itemPart
+      .replace(/\b(available|for donation|donate|donating|surplus|extra|of|is|are|there)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (itemPart) {
+      setFItem(itemPart.replace(/\b\w/g, (c) => c.toUpperCase()))
+    }
+  }
+
+  function handleVoiceInput() {
+    const SpeechRecognitionCtor =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognitionCtor) {
+      setVoiceSupported(false)
+      return
+    }
+
+    const recognition = new SpeechRecognitionCtor()
+    recognition.lang = 'en-IN'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => {
+      setListening(true)
+      setVoiceTranscript('')
+    }
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setVoiceTranscript(transcript)
+      parseVoiceInput(transcript)
+    }
+
+    recognition.onerror = () => {
+      setListening(false)
+      setVoiceTranscript('❌ Could not hear that. Try again or type manually.')
+    }
+
+    recognition.onend = () => {
+      setListening(false)
+    }
+
+    recognition.start()
+  }
 
   async function loadReports() {
     setLoading(true)
@@ -278,6 +351,23 @@ export default function Page() {
               <button aria-label="Close donation dialog" onClick={() => setModalOpen(false)} className="rounded-full border border-[#1f0e07]/15 p-2"><X className="size-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="mt-8 grid gap-4">
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                disabled={listening}
+                className={`flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-4 text-sm font-black uppercase transition ${
+                  listening ? 'border-[#ff5c00] bg-[#ff5c00]/10 text-[#ff5c00]' : 'border-[#1f0e07]/25 text-[#1f0e07]/70 hover:border-[#ff5c00] hover:text-[#ff5c00]'
+                }`}
+              >
+                <Mic className={`size-5 ${listening ? 'animate-pulse' : ''}`} />
+                {listening ? 'Listening…' : 'Speak your donation'}
+              </button>
+              {!voiceSupported && (
+                <p className="text-center text-xs text-red-600">Voice input isn't supported in this browser. Try Chrome, or fill the form manually.</p>
+              )}
+              {voiceTranscript && (
+                <p className="text-center text-xs text-[#1f0e07]/50 italic">"{voiceTranscript}"</p>
+              )}
               <label className="grid gap-2 text-xs font-black uppercase">Type
                 <select value={fType} onChange={(e) => setFType(e.target.value)} className="field">
                   <option value="donor">Restaurant / Donor</option>
