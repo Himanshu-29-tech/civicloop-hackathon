@@ -159,7 +159,7 @@ export default function Page() {
       })
       if (!res.ok) throw new Error('Request failed')
       await loadReports()
-      window.alert(`Ask the volunteer to open this link on their phone:\n\n${window.location.origin}/share/${id}`)
+      window.alert(`Ask the volunteer to open this link on their phone:\n\n${window.location.origin}/share?id=${id}`)
     } catch (err) {
       console.error(err)
       window.alert('Could not claim this report. Try again.')
@@ -246,7 +246,7 @@ export default function Page() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className="text-[#1f0e07]/45 text-[10px]">by {item.claimedBy || 'NGO'}</span>
-                        <a href={`/track/${item.id}`} target="_blank" className="rounded-full bg-[#ff5c00] px-3 py-1 text-[10px] font-black uppercase text-white">
+                        <a href={`/track?id=${item.id}`} target="_blank" className="rounded-full bg-[#ff5c00] px-3 py-1 text-[10px] font-black uppercase text-white">
                           Track →
                         </a>
                       </div>
